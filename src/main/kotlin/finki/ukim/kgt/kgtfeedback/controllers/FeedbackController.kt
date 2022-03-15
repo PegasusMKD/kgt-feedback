@@ -30,11 +30,11 @@ class FeedbackController(private val feedbackService: FeedbackService) {
         if (dto?.id != null)
             return ResponseEntity.badRequest()
                 .header("Error", "Cannot create feedback with an existing ID")
-                .body(null)
+                .build()
 
         dto?.correctedByUserId = userID
         val result = feedbackService.save(dto)
-        return result?.let { ResponseEntity.ok(it) } ?: ResponseEntity.badRequest().build()
+        return result?.let { ResponseEntity.ok(it) } ?: ResponseEntity.unprocessableEntity().build()
     }
 
     @PutMapping("/", produces = [APPLICATION_JSON_VALUE], consumes = [APPLICATION_JSON_VALUE])
@@ -53,14 +53,14 @@ class FeedbackController(private val feedbackService: FeedbackService) {
             return create(dto, roles, userID)
 
         val result = feedbackService.save(dto)
-        return result?.let { ResponseEntity.ok(it) } ?: ResponseEntity.badRequest().build()
+        return result?.let { ResponseEntity.ok(it) } ?: ResponseEntity.unprocessableEntity().build()
     }
 
     @GetMapping("/{id}", produces = [APPLICATION_JSON_VALUE])
     fun findById(@PathVariable id: String): ResponseEntity<FeedbackDto?> {
         logger.debug("Searching for feedback with ID: {}", id)
         val result = feedbackService.findOne(id)
-        return if (result != null) ResponseEntity.ok(result) else ResponseEntity.notFound().build()
+        return result?.let { ResponseEntity.ok(it) } ?: ResponseEntity.notFound().build()
     }
 
     @PostMapping("/page", produces = [APPLICATION_JSON_VALUE])
